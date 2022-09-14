@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -12,6 +13,7 @@ public class MainManager : MonoBehaviour
 
     public Text ScoreText;
     public GameObject GameOverText;
+    public Text HighScoreText;
     
     private bool m_Started = false;
     private int m_Points;
@@ -36,6 +38,15 @@ public class MainManager : MonoBehaviour
                 brick.onDestroyed.AddListener(AddPoint);
             }
         }
+
+        if(SceneDataManager.instance.LoadName() == null)
+        {
+            HighScoreText.text = "Best Score : Name : 0";
+        }
+        else
+        {
+            HighScoreText.text = "Best Score : " + SceneDataManager.instance.LoadName() + " : " + SceneDataManager.instance.LoadScore();
+        }
     }
 
     private void Update()
@@ -59,6 +70,10 @@ public class MainManager : MonoBehaviour
             {
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             }
+            else if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                SceneManager.LoadScene(0);
+            }
         }
     }
 
@@ -72,5 +87,20 @@ public class MainManager : MonoBehaviour
     {
         m_GameOver = true;
         GameOverText.SetActive(true);
+        SetHighScore();
+    }
+
+    void SetHighScore()
+    {
+        string[] txtArray = HighScoreText.text.Split(":");
+        int currentHighScore = int.Parse(txtArray[2]);
+        if (m_Points > currentHighScore)
+        {
+            //HighScoreText.text = "Best Score : " + SceneDataManager.instance.userName + " : " + m_Points;
+            SceneDataManager.instance.ClearFile();
+            SceneDataManager.instance.userScore = m_Points;
+            SceneDataManager.instance.SaveScore();
+            SceneDataManager.instance.SaveName();
+        }
     }
 }
